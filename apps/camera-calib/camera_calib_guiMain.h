@@ -72,6 +72,7 @@ class camera_calib_guiDialog : public wxDialog
 	static const long ID_STATICTEXT6;
 	static const long ID_TEXTCTRL3;
 	static const long ID_CHECKBOX1;
+	static const long ID_CHECKBOX2;
 	static const long ID_TEXTCTRL2;
 	static const long ID_BUTTON3;
 	static const long ID_BUTTON6;
@@ -93,6 +94,7 @@ class camera_calib_guiDialog : public wxDialog
 	//(*Declarations(camera_calib_guiDialog)
 	mrpt::gui::wxMRPTImageControl* bmpOriginal;
 	wxCheckBox* cbNormalize;
+	wxCheckBox* cbFisheye;
 	wxTextCtrl* edLengthX;
 	CMyGLCanvas* m_3Dview;
 	wxNotebook* Notebook1;

@@ -34,14 +34,14 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 	double check_squares_length_Y_meters, CMatrixDouble33& intrinsicParams,
 	std::vector<double>& distortionParams, bool normalize_image,
 	double* out_MSE, bool skipDrawDetectedImgs,
-	bool useScaramuzzaAlternativeDetector)
+	bool useScaramuzzaAlternativeDetector,bool useFisheye)
 {
 	// Just a wrapper for the newer version of the function which uses TCamera:
 	TCamera cam;
 	bool ret = checkerBoardCameraCalibration(
 		images, check_size_x, check_size_y, check_squares_length_X_meters,
 		check_squares_length_Y_meters, cam, normalize_image, out_MSE,
-		skipDrawDetectedImgs, useScaramuzzaAlternativeDetector);
+		skipDrawDetectedImgs, useScaramuzzaAlternativeDetector, useFisheye);
 
 	intrinsicParams = cam.intrinsicParams;
 	distortionParams = cam.getDistortionParamsAsVector();
@@ -61,7 +61,7 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 	double check_squares_length_Y_meters, mrpt::img::TCamera& out_camera_params,
 	bool normalize_image, double* out_MSE,
 	[[maybe_unused]] bool skipDrawDetectedImgs,
-	bool useScaramuzzaAlternativeDetector)
+	bool useScaramuzzaAlternativeDetector,bool useFisheye)
 {
 #if MRPT_HAS_OPENCV
 	try
@@ -277,13 +277,33 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 		// Calculate the camera parameters
 		// ---------------------------------------------
 		// Calibrate camera
-		cv::Mat cameraMatrix, distCoeffs(1, 5, CV_64F, cv::Scalar::all(0));
-		vector<cv::Mat> rvecs, tvecs;
+		cv::Mat cameraMatrix, distCoeffs;
+		if (useFisheye) {
+			distCoeffs = cv::Mat::zeros(4, 1, CV_64F);
+		} else {
+			distCoeffs = cv::Mat::zeros(5, 1, CV_64F);
+		}
 
-		const double cv_calib_err = cv::calibrateCamera(
+		vector<cv::Mat> rvecs, tvecs;
+		double cv_calib_err;
+		if (useFisheye) {
+			cv::Mat _rvecs, _tvecs;
+			int  flag = cv::fisheye::CALIB_FIX_SKEW | cv::fisheye::CALIB_RECOMPUTE_EXTRINSIC;
+			cv_calib_err = cv::fisheye::calibrate(objectPoints, imagePoints, imgSize, cameraMatrix, distCoeffs, _rvecs,
+									_tvecs, flag);
+
+			rvecs.reserve(_rvecs.rows);
+			tvecs.reserve(_tvecs.rows);
+			for(int ii = 0; ii < int(objectPoints.size()); ii++){
+				rvecs.push_back(_rvecs.row(ii));
+				tvecs.push_back(_tvecs.row(ii));
+			}
+			distCoeffs.push_back(0);
+		} else {
+		 cv_calib_err = cv::calibrateCamera(
 			objectPoints, imagePoints, imgSize, cameraMatrix, distCoeffs, rvecs,
 			tvecs, 0 /*flags*/);
-
+		}
 		// Load matrix:
 		{
 			Eigen::Matrix3d M;

@@ -99,6 +99,7 @@ const long camera_calib_guiDialog::ID_TEXTCTRL1 = wxNewId();
 const long camera_calib_guiDialog::ID_STATICTEXT6 = wxNewId();
 const long camera_calib_guiDialog::ID_TEXTCTRL3 = wxNewId();
 const long camera_calib_guiDialog::ID_CHECKBOX1 = wxNewId();
+const long camera_calib_guiDialog::ID_CHECKBOX2 = wxNewId();
 const long camera_calib_guiDialog::ID_TEXTCTRL2 = wxNewId();
 const long camera_calib_guiDialog::ID_BUTTON3 = wxNewId();
 const long camera_calib_guiDialog::ID_BUTTON6 = wxNewId();
@@ -272,9 +273,9 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 		StaticText2, 1,
 		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
 	edSizeY = new wxSpinCtrl(
-		this, ID_SPINCTRL2, _T("6"), wxDefaultPosition, wxSize(50, -1), 0, 1,
+		this, ID_SPINCTRL2, _T("8"), wxDefaultPosition, wxSize(50, -1), 0, 1,
 		200, 8, _T("ID_SPINCTRL2"));
-	edSizeY->SetValue(_T("6"));
+	edSizeY->SetValue(_T("8"));
 	FlexGridSizer17->Add(
 		edSizeY, 1, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
 		5);
@@ -282,7 +283,7 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 		FlexGridSizer17, 1, wxALL | wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 0);
 	FlexGridSizer6->Add(
 		StaticBoxSizer4, 1, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 2);
-	wxString __wxRadioBoxChoices_1[2] = {_("OpenCV\'s default"),
+	wxString __wxRadioBoxChoices_1[3] = {_("OpenCV\'s default"),
 										 _("Scaramuzza et al.\'s")};
 	rbMethod = new wxRadioBox(
 		this, ID_RADIOBOX1, _(" Detector method: "), wxDefaultPosition,
@@ -300,7 +301,7 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 		StaticText3, 1,
 		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
 	edLengthX = new wxTextCtrl(
-		this, ID_TEXTCTRL1, _("25.0"), wxDefaultPosition, wxSize(40, -1), 0,
+		this, ID_TEXTCTRL1, _("50.0"), wxDefaultPosition, wxSize(40, -1), 0,
 		wxDefaultValidator, _T("ID_TEXTCTRL1"));
 	FlexGridSizer18->Add(
 		edLengthX, 1,
@@ -312,7 +313,7 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 		StaticText6, 1,
 		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
 	edLengthY = new wxTextCtrl(
-		this, ID_TEXTCTRL3, _("25.0"), wxDefaultPosition, wxSize(40, -1), 0,
+		this, ID_TEXTCTRL3, _("50.0"), wxDefaultPosition, wxSize(40, -1), 0,
 		wxDefaultValidator, _T("ID_TEXTCTRL3"));
 	FlexGridSizer18->Add(
 		edLengthY, 1,
@@ -325,9 +326,16 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 		this, ID_CHECKBOX1, _("Normalize image"), wxDefaultPosition,
 		wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX1"));
 	cbNormalize->SetValue(true);
+	cbFisheye = new wxCheckBox(
+		this, ID_CHECKBOX2, _("Fisheye image"), wxDefaultPosition,
+		wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX2"));
+	cbFisheye->SetValue(true);
 	FlexGridSizer6->Add(
 		cbNormalize, 1,
-		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+		wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 2);
+	FlexGridSizer6->Add(
+		cbFisheye, 1,
+		wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 2);
 	StaticBoxSizer3->Add(
 		FlexGridSizer6, 1, wxALL | wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 0);
 	FlexGridSizer2->Add(
@@ -651,7 +659,7 @@ void camera_calib_guiDialog::OnbtnRunCalibClick(wxCommandEvent& event)
 			lst_images, check_size_x, check_size_y,
 			check_squares_length_X_meters, check_squares_length_Y_meters,
 			camera_params, normalize_image, nullptr /* MSE */,
-			false /* skip draw */, useScaramuzzaAlternativeDetector);
+			false /* skip draw */, useScaramuzzaAlternativeDetector,false);
 
 		refreshDisplayedImage();
 
