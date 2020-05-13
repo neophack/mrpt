@@ -72,6 +72,8 @@ class CImageGrabber_OpenCV
 	struct Impl;
 	mrpt::pimpl<Impl> m_capture;
 
+	std::string color_;
+
    public:
 	/** Constructor for cameras:
 	 * \param cameraIndex Set the camera index, or -1 if it does not matter and
@@ -84,7 +86,7 @@ class CImageGrabber_OpenCV
 	 */
 	CImageGrabber_OpenCV(
 		int cameraIndex = -1, TCameraType cameraType = CAMERA_CV_AUTODETECT,
-		const TCaptureCVOptions& options = TCaptureCVOptions());
+		const TCaptureCVOptions& options = TCaptureCVOptions(),std::string color="default");
 
 	/** Constructor for AVI files:
 	 */

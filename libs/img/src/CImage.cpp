@@ -979,7 +979,24 @@ bool CImage::grayscale(CImage& ret) const
 		// Detect in-place op and make deep copy:
 		if (src.data == ret.m_impl->img.data) src = src.clone();
 
-		return my_img_to_grayscale(src, ret.m_impl->img);
+		if (isuyvy)
+		{
+			
+			cv::Size srcsize = src.size();
+			unsigned char* YUV = src.data;
+
+			int width = srcsize.width;
+			int height = srcsize.height;
+			int NumPixels = width * height;
+			
+			cv::Mat des ;//= cv::Mat(height, width, CV_8UC2);
+			cv::cvtColor(src,des,cv::COLOR_BGR2YUV);
+			return my_img_to_grayscale(des, ret.m_impl->img);
+		}
+		else
+		{
+			return my_img_to_grayscale(src, ret.m_impl->img);
+		}
 	}
 #else
 	THROW_EXCEPTION("Operation not supported: build MRPT against OpenCV!");
@@ -1706,6 +1723,48 @@ void CImage::undistort(
 		for (int j = 0; j < 3; j++) inMat.at<double>(i, j) = intrMat(i, j);
 
 	cv::undistort(srcImg, out_img.m_impl->img, inMat, distM);
+#endif
+}
+
+void CImage::undistortFisheye(
+	CImage& out_img, const mrpt::img::TCamera& cameraParams) const
+{
+#if MRPT_HAS_OPENCV
+	makeSureImageIsLoaded();  // For delayed loaded images stored externally
+
+	ASSERTMSG_(
+		out_img.m_impl->img.data != m_impl->img.data,
+		"In-place undistort() not supported");
+
+	auto& srcImg = const_cast<cv::Mat&>(m_impl->img);
+	// This will avoid re-alloc if size already matches.
+	out_img.resize(srcImg.cols, srcImg.rows, getChannelCount());
+
+	const auto& intrMat = cameraParams.intrinsicParams;
+	const auto& dist = cameraParams.dist;
+
+	cv::Mat distM(1, 4, CV_64F, const_cast<double*>(&dist[0]));
+	cv::Mat inMat(3, 3, CV_64F);
+
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++) inMat.at<double>(i, j) = intrMat(i, j);
+	cv::Matx33d newK = inMat;
+	cv::fisheye::undistortImage(
+		srcImg, out_img.m_impl->img, inMat, distM, newK);
+	// cv::undistort(srcImg, out_img.m_impl->img, inMat, distM);
+#endif
+}
+
+CImage CImage::turn180()
+{
+#if MRPT_HAS_OPENCV
+	CImage ret(*this);
+	ret.m_impl->img = m_impl->img.clone();
+	auto& srcImg = const_cast<cv::Mat&>(ret.m_impl->img);
+	cv::flip(srcImg, srcImg, 0);
+	cv::flip(srcImg, ret.m_impl->img, 1);
+	return ret;
+
 #endif
 }
 

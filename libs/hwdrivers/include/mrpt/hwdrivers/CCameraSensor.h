@@ -431,6 +431,7 @@ class CCameraSensor : public mrpt::system::COutputLogger, public CGenericSensor
 	// Options for grabber_type= opencv  ------------------------------------
 	int m_cv_camera_index{0};
 	std::string m_cv_camera_type;
+	std::string m_cv_camera_color;
 	TCaptureCVOptions m_cv_options;
 
 	// Options for grabber_type= dc1394 -------------------------------------

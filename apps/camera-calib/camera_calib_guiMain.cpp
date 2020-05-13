@@ -99,10 +99,12 @@ const long camera_calib_guiDialog::ID_TEXTCTRL1 = wxNewId();
 const long camera_calib_guiDialog::ID_STATICTEXT6 = wxNewId();
 const long camera_calib_guiDialog::ID_TEXTCTRL3 = wxNewId();
 const long camera_calib_guiDialog::ID_CHECKBOX1 = wxNewId();
+const long camera_calib_guiDialog::ID_CHECKBOX2 = wxNewId();
 const long camera_calib_guiDialog::ID_TEXTCTRL2 = wxNewId();
 const long camera_calib_guiDialog::ID_BUTTON3 = wxNewId();
 const long camera_calib_guiDialog::ID_BUTTON6 = wxNewId();
 const long camera_calib_guiDialog::ID_BUTTON7 = wxNewId();
+const long camera_calib_guiDialog::ID_BUTTON11 = wxNewId();
 const long camera_calib_guiDialog::ID_BUTTON5 = wxNewId();
 const long camera_calib_guiDialog::ID_BUTTON4 = wxNewId();
 const long camera_calib_guiDialog::ID_CUSTOM2 = wxNewId();
@@ -149,6 +151,7 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 	wxFlexGridSizer* FlexGridSizer1;
 	wxFlexGridSizer* FlexGridSizer17;
 	wxStaticBoxSizer* StaticBoxSizer5;
+	wxStaticBoxSizer* StaticBoxSizer9;
 
 	Create(
 		parent, id, _("Camera calibration GUI - Part of the MRPT project"),
@@ -274,7 +277,7 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 	edSizeY = new wxSpinCtrl(
 		this, ID_SPINCTRL2, _T("6"), wxDefaultPosition, wxSize(50, -1), 0, 1,
 		200, 8, _T("ID_SPINCTRL2"));
-	edSizeY->SetValue(_T("6"));
+	edSizeY->SetValue(_T("8"));
 	FlexGridSizer17->Add(
 		edSizeY, 1, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
 		5);
@@ -300,7 +303,7 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 		StaticText3, 1,
 		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
 	edLengthX = new wxTextCtrl(
-		this, ID_TEXTCTRL1, _("25.0"), wxDefaultPosition, wxSize(40, -1), 0,
+		this, ID_TEXTCTRL1, _("50.0"), wxDefaultPosition, wxSize(40, -1), 0,
 		wxDefaultValidator, _T("ID_TEXTCTRL1"));
 	FlexGridSizer18->Add(
 		edLengthX, 1,
@@ -312,7 +315,7 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 		StaticText6, 1,
 		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
 	edLengthY = new wxTextCtrl(
-		this, ID_TEXTCTRL3, _("25.0"), wxDefaultPosition, wxSize(40, -1), 0,
+		this, ID_TEXTCTRL3, _("50.0"), wxDefaultPosition, wxSize(40, -1), 0,
 		wxDefaultValidator, _T("ID_TEXTCTRL3"));
 	FlexGridSizer18->Add(
 		edLengthY, 1,
@@ -321,13 +324,25 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 		FlexGridSizer18, 1, wxALL | wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 0);
 	FlexGridSizer6->Add(
 		StaticBoxSizer5, 1, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 2);
+	StaticBoxSizer9 = new wxStaticBoxSizer(
+		wxHORIZONTAL, this, _("Other: "));
 	cbNormalize = new wxCheckBox(
 		this, ID_CHECKBOX1, _("Normalize image"), wxDefaultPosition,
 		wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX1"));
 	cbNormalize->SetValue(true);
-	FlexGridSizer6->Add(
+	cbFisheye = new wxCheckBox(
+		this, ID_CHECKBOX2, _("Fisheye image"), wxDefaultPosition,
+		wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX2"));
+	cbFisheye->SetValue(true);
+	StaticBoxSizer9->Add(
 		cbNormalize, 1,
-		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+        wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 2);
+	StaticBoxSizer9->Add(
+		cbFisheye, 1,
+		wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 2);
+	FlexGridSizer6->Add(
+		StaticBoxSizer9, 1, wxALL | wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 2
+	);
 	StaticBoxSizer3->Add(
 		FlexGridSizer6, 1, wxALL | wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 0);
 	FlexGridSizer2->Add(
@@ -371,6 +386,11 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 		wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON6"));
 	FlexGridSizer8->Add(
 		btnSave, 1, wxALL | wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 5);
+	btnSaveJson = new wxButton(
+		this, ID_BUTTON11, _("Save Json..."), wxDefaultPosition,
+		wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON6"));
+	FlexGridSizer8->Add(
+		btnSaveJson, 1, wxALL | wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 5);
 	FlexGridSizer8->Add(
 		-1, -1, 1, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
 		5);
@@ -510,6 +530,9 @@ camera_calib_guiDialog::camera_calib_guiDialog(wxWindow* parent, wxWindowID id)
 	Bind(
 		wxEVT_BUTTON, &camera_calib_guiDialog::OnbtnPoseEstimateNowClick, this,
 		ID_BUTTON10);
+	Bind(
+		wxEVT_BUTTON, &camera_calib_guiDialog::OnbtnSaveJsonClick, this,
+		ID_BUTTON11);
 	//*)
 
 	camera_params.intrinsicParams(0, 0) = 0;  // Indicate calib didn't run yet.
@@ -642,6 +665,8 @@ void camera_calib_guiDialog::OnbtnRunCalibClick(wxCommandEvent& event)
 
 		const bool normalize_image = cbNormalize->GetValue();
 
+		const bool use_fisheye = cbFisheye->GetValue();
+
 		const bool useScaramuzzaAlternativeDetector =
 			rbMethod->GetSelection() == 1;
 
@@ -651,9 +676,9 @@ void camera_calib_guiDialog::OnbtnRunCalibClick(wxCommandEvent& event)
 			lst_images, check_size_x, check_size_y,
 			check_squares_length_X_meters, check_squares_length_Y_meters,
 			camera_params, normalize_image, nullptr /* MSE */,
-			false /* skip draw */, useScaramuzzaAlternativeDetector);
+			false /* skip draw */, useScaramuzzaAlternativeDetector,use_fisheye);
 
-		refreshDisplayedImage();
+		refreshDisplayedImage(use_fisheye);
 
 		if (!res)
 			wxMessageBox(
@@ -714,6 +739,47 @@ void camera_calib_guiDialog::OnbtnSaveClick(wxCommandEvent& event)
 	}
 }
 
+// save matrices:
+void camera_calib_guiDialog::OnbtnSaveJsonClick(wxCommandEvent& event)
+{
+	nlohmann::json js;
+	if (camera_params.intrinsicParams(0, 0) == 0)
+	{
+		wxMessageBox(_("Run the calibration first"), _("Error"));
+		return;
+	}
+
+	{
+		wxFileDialog dlg(
+			this, _("Save intrinsic & distortion parameters matrix"), _("."),
+			_("config1.json"),
+			_("Json files (*.json)|*.json|All files (*.*)|*.*"),
+			wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+		if (wxID_OK != dlg.ShowModal()) return;
+		CMatrixDouble M(1, 5);
+		for (unsigned i = 0; i < 5; i++) M(0, i) = camera_params.dist[i];
+		
+		// CMatrixDouble K(3,3);
+ 		auto& JK = camera_params.intrinsicParams;
+		for(uint8_t i=0; i<9; i++,i++,i++)
+		{
+			js["cam"]["K"].push_back({JK(i/3,0),JK(i/3,1),JK(i/3,2)});
+			// K(i/3,i%3) = JK(i/3,i%3);
+		}
+		
+		
+		js["cam"]["D"]=M;
+		 std::ofstream f(string(dlg.GetPath().mb_str()));
+		if(!f.good())
+		{return;}
+		f << js.dump(4);
+    	f.close();
+		
+	}
+
+	
+}
 // Update the listbox from lst_img_files
 void camera_calib_guiDialog::updateListOfImages()
 {
@@ -727,7 +793,7 @@ void camera_calib_guiDialog::updateListOfImages()
 }
 
 // Shows the image selected in the listbox:
-void camera_calib_guiDialog::refreshDisplayedImage()
+void camera_calib_guiDialog::refreshDisplayedImage(bool use_fisheye)
 {
 	try
 	{
@@ -772,7 +838,12 @@ void camera_calib_guiDialog::refreshDisplayedImage()
 		}
 		else
 		{
-			imgOrgColor.undistort(imgRect, camera_params);
+			if(use_fisheye){
+				imgOrgColor.undistortFisheye(imgRect, camera_params);
+			}else{
+				imgOrgColor.undistort(imgRect, camera_params);
+			}
+			
 			imgRect.scaleImage(
 				imgRect, imgSizes.x * zoomVal, imgSizes.y * zoomVal,
 				IMG_INTERP_NN);
@@ -802,10 +873,10 @@ void camera_calib_guiDialog::refreshDisplayedImage()
 				it->second.detected_corners[k].x * zoomVal,
 				it->second.detected_corners[k].y * zoomVal, TColor::blue(), '+',
 				3);
-			imgCheck.drawCircle(
-				it->second.projectedPoints_distorted[k].x * zoomVal,
-				it->second.projectedPoints_distorted[k].y * zoomVal, 4,
-				TColor(0, 255, 64));
+//			imgCheck.drawCircle(
+//				it->second.projectedPoints_distorted[k].x * zoomVal,
+//				it->second.projectedPoints_distorted[k].y * zoomVal, 4,
+//				TColor(0, 255, 64));
 		}
 		imgCheck.drawCircle(10, 10, 4, TColor(0, 255, 64));
 		imgCheck.textOut(18, 4, "Reprojected corners", TColor::white());

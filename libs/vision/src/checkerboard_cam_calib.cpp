@@ -34,14 +34,14 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 	double check_squares_length_Y_meters, CMatrixDouble33& intrinsicParams,
 	std::vector<double>& distortionParams, bool normalize_image,
 	double* out_MSE, bool skipDrawDetectedImgs,
-	bool useScaramuzzaAlternativeDetector)
+	bool useScaramuzzaAlternativeDetector,bool useFisheye)
 {
 	// Just a wrapper for the newer version of the function which uses TCamera:
 	TCamera cam;
 	bool ret = checkerBoardCameraCalibration(
 		images, check_size_x, check_size_y, check_squares_length_X_meters,
 		check_squares_length_Y_meters, cam, normalize_image, out_MSE,
-		skipDrawDetectedImgs, useScaramuzzaAlternativeDetector);
+		skipDrawDetectedImgs, useScaramuzzaAlternativeDetector, useFisheye);
 
 	intrinsicParams = cam.intrinsicParams;
 	distortionParams = cam.getDistortionParamsAsVector();
@@ -61,7 +61,7 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 	double check_squares_length_Y_meters, mrpt::img::TCamera& out_camera_params,
 	bool normalize_image, double* out_MSE,
 	[[maybe_unused]] bool skipDrawDetectedImgs,
-	bool useScaramuzzaAlternativeDetector)
+	bool useScaramuzzaAlternativeDetector,bool useFisheye)
 {
 #if MRPT_HAS_OPENCV
 	try
@@ -279,11 +279,28 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 		// Calibrate camera
 		cv::Mat cameraMatrix, distCoeffs(1, 5, CV_64F, cv::Scalar::all(0));
 		vector<cv::Mat> rvecs, tvecs;
+		double cv_calib_err;
+		if (useFisheye) {
+			cv::Mat _rvecs, _tvecs;
+			cv::Mat _distCoeffs = cv::Mat::zeros(1, 4, CV_64F);
+                        //std::cout<<"useFisheye"<<std::endl;
+			int  flag = cv::fisheye::CALIB_FIX_SKEW | cv::fisheye::CALIB_RECOMPUTE_EXTRINSIC;
+			cv_calib_err = cv::fisheye::calibrate(objectPoints, imagePoints, imgSize, cameraMatrix, _distCoeffs, _rvecs,
+									_tvecs, flag);
 
-		const double cv_calib_err = cv::calibrateCamera(
+			rvecs.reserve(_rvecs.rows);
+			tvecs.reserve(_tvecs.rows);
+			for(int ii = 0; ii < int(objectPoints.size()); ii++){
+				rvecs.push_back(_rvecs.row(ii));
+				tvecs.push_back(_tvecs.row(ii));
+			}
+                        //std::cout<<cameraMatrix<<_distCoeffs<<std::endl;
+			cv::vconcat(_distCoeffs,cv::Mat::zeros(1, 1, CV_64F),distCoeffs);
+		} else {
+		 cv_calib_err = cv::calibrateCamera(
 			objectPoints, imagePoints, imgSize, cameraMatrix, distCoeffs, rvecs,
 			tvecs, 0 /*flags*/);
-
+		}
 		// Load matrix:
 		{
 			Eigen::Matrix3d M;
@@ -295,6 +312,7 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 		for (int k = 0; k < 5; k++)
 			out_camera_params.dist[k] = distCoeffs.ptr<double>()[k];
 
+                if(!useFisheye)
 		// Load camera poses:
 		for (i = 0; i < valid_detected_imgs; i++)
 		{
@@ -340,8 +358,14 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 		{
 			TImageCalibData& dat = it->second;
 			if (!dat.img_original.isExternallyStored())
-				dat.img_original.undistort(
-					dat.img_rectified, out_camera_params);
+			    if(useFisheye){
+					dat.img_original.undistortFisheye(
+						dat.img_rectified, out_camera_params);
+				}else{
+					dat.img_original.undistort(
+						dat.img_rectified, out_camera_params);
+				}
+				
 		}  // end undistort
 
 		// -----------------------------------------------
@@ -372,7 +396,8 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 				lstPatternPoints,  // Input points
 				dat.reconstructed_camera_pose,
 				out_camera_params.intrinsicParams,  // calib matrix
-				projectedPoints  // Output points in pixels
+				projectedPoints,  // Output points in pixels
+				useFisheye
 			);
 
 			vision::pinhole::projectPoints_with_distortion(
@@ -380,7 +405,8 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 				dat.reconstructed_camera_pose,
 				out_camera_params.intrinsicParams,  // calib matrix
 				out_camera_params.getDistortionParamsAsVector(),
-				projectedPoints_distorted  // Output points in pixels
+				projectedPoints_distorted,  // Output points in pixels
+				useFisheye
 			);
 
 			ASSERT_(projectedPoints.size() == CORNERS_COUNT);

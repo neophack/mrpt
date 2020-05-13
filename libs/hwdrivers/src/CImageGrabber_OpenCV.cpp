@@ -33,12 +33,13 @@ struct CImageGrabber_OpenCV::Impl
 				Constructor
 -------------------------------------------------------------*/
 CImageGrabber_OpenCV::CImageGrabber_OpenCV(
-	int cameraIndex, TCameraType cameraType, const TCaptureCVOptions& options)
+	int cameraIndex, TCameraType cameraType, const TCaptureCVOptions& options,
+	string color)
 	: m_capture(mrpt::make_impl<CImageGrabber_OpenCV::Impl>())
 {
 	MRPT_START
 	m_bInitialized = false;
-
+	color_ = color;
 #if MRPT_HAS_OPENCV
 	int cv_cap_indx = 0;
 	switch (cameraType)
@@ -231,6 +232,11 @@ bool CImageGrabber_OpenCV::getObservation(
 			out_observation.timestamp = mrpt::system::now();
 			out_observation.image =
 				mrpt::img::CImage(capImg, mrpt::img::SHALLOW_COPY);
+			if (color_ == "uyvy")
+			{
+				out_observation.image.isuyvy = true;
+			}
+
 			return true;
 		}
 		cerr << "[CImageGrabber_OpenCV] WARNING: Ignoring error #" << nTries + 1
