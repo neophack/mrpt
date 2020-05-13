@@ -32,7 +32,7 @@ void mrpt::vision::pinhole::projectPoints_no_distortion(
 	const std::vector<mrpt::math::TPoint3D>& in_points_3D,
 	const mrpt::poses::CPose3D& cameraPose,
 	const mrpt::math::CMatrixDouble33& intrinsicParams,
-	std::vector<TPixelCoordf>& projectedPoints, bool accept_points_behind)
+	std::vector<TPixelCoordf>& projectedPoints, bool accept_points_behind,bool useFisheye)
 {
 	MRPT_START
 
@@ -41,7 +41,7 @@ void mrpt::vision::pinhole::projectPoints_no_distortion(
 
 	projectPoints_with_distortion(
 		in_points_3D, cameraPose, intrinsicParams, distortion_dummy,
-		projectedPoints, accept_points_behind);
+		projectedPoints, accept_points_behind, useFisheye);
 	MRPT_END
 }
 
@@ -54,7 +54,7 @@ void mrpt::vision::pinhole::projectPoints_with_distortion(
 	const mrpt::math::CMatrixDouble33& intrinsicParams,
 	const std::vector<double>& distortionParams,
 	std::vector<mrpt::img::TPixelCoordf>& projectedPoints,
-	bool accept_points_behind)
+	bool accept_points_behind,bool useFisheye)
 {
 	MRPT_START
 #if MRPT_HAS_OPENCV
@@ -102,10 +102,16 @@ void mrpt::vision::pinhole::projectPoints_with_distortion(
 		const_cast<double*>(&distortionParams[0]));
 
 	vector<cv::Point2d> image_points;
-
-	cv::projectPoints(
+	if (useFisheye)
+	{
+		cv::fisheye::projectPoints(object_points, image_points, rotvec, _translation_vector, camera_matrix,
+								dist_coeffs);
+	}else{
+		cv::projectPoints(
 		object_points, rotvec, _translation_vector, camera_matrix, dist_coeffs,
 		image_points);
+	}
+	
 
 	for (size_t i = 0; i < N; i++)
 	{
@@ -251,7 +257,7 @@ void mrpt::vision::pinhole::projectPoints_with_distortion(
 	const std::vector<mrpt::math::TPoint3D>& P,
 	const mrpt::img::TCamera& params,
 	const mrpt::poses::CPose3DQuat& cameraPose,
-	std::vector<mrpt::img::TPixelCoordf>& pixels, bool accept_points_behind)
+	std::vector<mrpt::img::TPixelCoordf>& pixels, bool accept_points_behind,bool useFisheye)
 {
 	MRPT_START
 

@@ -210,6 +210,7 @@ class CPanelCameraSelection : public wxPanel
 	wxCheckBox* cbSR_ch3D;
 	wxStaticText* StaticText4;
 	wxChoice* cbOpencvResolution;
+	wxChoice* cbOpencvColor;
 	//*)
 
    protected:
@@ -220,6 +221,8 @@ class CPanelCameraSelection : public wxPanel
 	static const long ID_CHOICE1;
 	static const long ID_STATICTEXT6;
 	static const long ID_CHOICE2;
+	static const long ID_STATICTEXT12;
+	static const long ID_CHOICE3;
 	static const long ID_PANEL2;
 	static const long ID_STATICTEXT7;
 	static const long ID_TEXTCTRL1;

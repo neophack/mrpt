@@ -201,6 +201,8 @@ const long CPanelCameraSelection::ID_STATICTEXT3 = wxNewId();
 const long CPanelCameraSelection::ID_CHOICE1 = wxNewId();
 const long CPanelCameraSelection::ID_STATICTEXT6 = wxNewId();
 const long CPanelCameraSelection::ID_CHOICE2 = wxNewId();
+const long CPanelCameraSelection::ID_STATICTEXT12 = wxNewId();
+const long CPanelCameraSelection::ID_CHOICE3 = wxNewId();
 const long CPanelCameraSelection::ID_PANEL2 = wxNewId();
 const long CPanelCameraSelection::ID_STATICTEXT7 = wxNewId();
 const long CPanelCameraSelection::ID_TEXTCTRL1 = wxNewId();
@@ -320,6 +322,20 @@ CPanelCameraSelection::CPanelCameraSelection(wxWindow* parent, wxWindowID id)
 	cbOpencvResolution->Append(_("640x480"));
 	FlexGridSizer10->Add(
 		cbOpencvResolution, 1, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL,
+		5);
+	StaticText6 = new wxStaticText(
+		Panel2, ID_STATICTEXT12, _("Color:"), wxDefaultPosition,
+		wxDefaultSize, 0, _T("ID_STATICTEXT6"));
+	FlexGridSizer10->Add(
+		StaticText6, 1, wxALL | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 5);
+	cbOpencvColor = new wxChoice(
+		Panel2, ID_CHOICE3, wxDefaultPosition, wxDefaultSize, 0, nullptr, 0,
+		wxDefaultValidator, _T("ID_CHOICE2"));
+	cbOpencvColor->SetSelection(cbOpencvColor->Append(_("default")));
+	cbOpencvColor->Append(_("uyvy"));
+	cbOpencvColor->Append(_("yuyv"));
+	FlexGridSizer10->Add(
+		cbOpencvColor, 1, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL,
 		5);
 	FlexGridSizer10->Add(
 		-1, -1, 1, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL,
@@ -623,7 +639,9 @@ CPanelCameraSelection::CPanelCameraSelection(wxWindow* parent, wxWindowID id)
 	cbOpencvResolution->Append(_("640x480"));
 	cbOpencvResolution->Append(_("800x600"));
 	cbOpencvResolution->Append(_("1024x768"));
+	cbOpencvResolution->Append(_("1280x720"));
 	cbOpencvResolution->Append(_("1280x1024"));
+	cbOpencvResolution->Append(_("1920x1080"));
 }
 
 void CPanelCameraSelection::OnbtnBrowseVideoClick(wxCommandEvent& event)
@@ -697,6 +715,7 @@ void CPanelCameraSelection::writeConfigFromVideoSourcePanel(
 			cfg->write(
 				sect, "cv_camera_type",
 				string(this->cbOpencvCamType->GetStringSelection().mb_str()));
+			cfg->write(sect,"cv_camera_color",string(this->cbOpencvColor->GetStringSelection().mb_str()));
 
 			const std::string sRes =
 				std::string(cbOpencvResolution->GetStringSelection().mb_str());
@@ -861,7 +880,8 @@ void CPanelCameraSelection::readConfigIntoVideoSourcePanel(
 			cfg->read_int(sect, "cv_camera_index", 0));
 		this->cbOpencvCamType->SetStringSelection(
 			cfg->read_string(sect, "cv_camera_type", "").c_str());
-
+		this->cbOpencvColor->SetStringSelection(
+			cfg->read_string(sect, "cv_camera_color", "").c_str());
 		const int w = cfg->read_int(sect, "cv_frame_width", 0);
 
 		if (w == 320)
