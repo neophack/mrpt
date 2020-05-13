@@ -26,6 +26,7 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 #include "MyGLCanvas.h"
+#include "json/json.hpp"
 //*)
 
 #include <mrpt/gui/CDisplayWindow3D.h>
@@ -46,6 +47,7 @@ class camera_calib_guiDialog : public wxDialog
 	void OnbtnCloseClick(wxCommandEvent& event);
 	void OnbtnAboutClick(wxCommandEvent& event);
 	void OnbtnSaveClick(wxCommandEvent& event);
+	void OnbtnSaveJsonClick(wxCommandEvent& event);
 	void OnlbFilesSelect(wxCommandEvent& event);
 	void OnbtnManualRectClick(wxCommandEvent& event);
 	void OnbtnCaptureNowClick(wxCommandEvent& event);
@@ -79,6 +81,7 @@ class camera_calib_guiDialog : public wxDialog
 	static const long ID_BUTTON7;
 	static const long ID_BUTTON5;
 	static const long ID_BUTTON4;
+	static const long ID_BUTTON11;
 	static const long ID_CUSTOM2;
 	static const long ID_SCROLLEDWINDOW2;
 	static const long ID_PANEL2;
@@ -100,6 +103,7 @@ class camera_calib_guiDialog : public wxDialog
 	wxNotebook* Notebook1;
 	wxRadioBox* rbMethod;
 	wxButton* btnSave;
+	wxButton* btnSaveJson;
 	wxButton* btnAbout;
 	wxStaticText* StaticText2;
 	wxButton* btnClose;
@@ -128,6 +132,7 @@ class camera_calib_guiDialog : public wxDialog
 	wxListBox* lbFiles;
 	wxFlexGridSizer* FlexGridSizer11;
 	wxButton* btnManualRect;
+	wxStaticBoxSizer* StaticBoxSizer8;
 	//*)
 
 	DECLARE_EVENT_TABLE()
@@ -135,7 +140,7 @@ class camera_calib_guiDialog : public wxDialog
 	void updateListOfImages();
 
 	// Shows the image selected in the listbox:
-	void refreshDisplayedImage();
+	void refreshDisplayedImage(bool use_fisheye=false);
 
 	// Shows a 3D view of the cams.
 	void show3Dview();

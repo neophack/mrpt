@@ -29,7 +29,7 @@ endif()
 
 # Define the executable target:
 add_executable(${PROJECT_NAME} WIN32 ${SRCS} ${MRPT_VERSION_RC_FILE})
-
+include_directories("${MRPT_SOURCE_DIR}/3rdparty")
 
 # Add the required libraries for linking:
 target_link_libraries(${PROJECT_NAME} imp_wxwidgets )

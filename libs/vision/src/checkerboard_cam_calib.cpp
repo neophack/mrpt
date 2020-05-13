@@ -278,18 +278,20 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 		// ---------------------------------------------
 		// Calibrate camera
 		cv::Mat cameraMatrix, distCoeffs;
-		if (useFisheye) {
-			distCoeffs = cv::Mat::zeros(4, 1, CV_64F);
-		} else {
-			distCoeffs = cv::Mat::zeros(5, 1, CV_64F);
-		}
+		// if (useFisheye) {
+			
+		// } else {
+			distCoeffs = cv::Mat::zeros(1, 5, CV_64F);
+		// }
 
 		vector<cv::Mat> rvecs, tvecs;
 		double cv_calib_err;
 		if (useFisheye) {
 			cv::Mat _rvecs, _tvecs;
+			cv::Mat _distCoeffs = cv::Mat::zeros(1, 4, CV_64F);
+            std::cout<<"useFisheye"<<std::endl;
 			int  flag = cv::fisheye::CALIB_FIX_SKEW | cv::fisheye::CALIB_RECOMPUTE_EXTRINSIC;
-			cv_calib_err = cv::fisheye::calibrate(objectPoints, imagePoints, imgSize, cameraMatrix, distCoeffs, _rvecs,
+			cv_calib_err = cv::fisheye::calibrate(objectPoints, imagePoints, imgSize, cameraMatrix, _distCoeffs, _rvecs,
 									_tvecs, flag);
 
 			rvecs.reserve(_rvecs.rows);
@@ -298,12 +300,15 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 				rvecs.push_back(_rvecs.row(ii));
 				tvecs.push_back(_tvecs.row(ii));
 			}
-			distCoeffs.push_back(0);
+            std::cout<<cameraMatrix<<_distCoeffs<<std::endl;
+			// for (int k = 0; k < 4; k++)
+			cv::vconcat(_distCoeffs,cv::Mat::zeros(1, 1, CV_64F),distCoeffs);
 		} else {
 		 cv_calib_err = cv::calibrateCamera(
 			objectPoints, imagePoints, imgSize, cameraMatrix, distCoeffs, rvecs,
 			tvecs, 0 /*flags*/);
 		}
+        std::cout<<rvecs[0]<<std::endl;
 		// Load matrix:
 		{
 			Eigen::Matrix3d M;
@@ -315,6 +320,7 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 		for (int k = 0; k < 5; k++)
 			out_camera_params.dist[k] = distCoeffs.ptr<double>()[k];
 
+        if(!useFisheye)
 		// Load camera poses:
 		for (i = 0; i < valid_detected_imgs; i++)
 		{
@@ -360,8 +366,14 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 		{
 			TImageCalibData& dat = it->second;
 			if (!dat.img_original.isExternallyStored())
-				dat.img_original.undistort(
-					dat.img_rectified, out_camera_params);
+			    if(useFisheye){
+					dat.img_original.undistortFisheye(
+						dat.img_rectified, out_camera_params);
+				}else{
+					dat.img_original.undistort(
+						dat.img_rectified, out_camera_params);
+				}
+				
 		}  // end undistort
 
 		// -----------------------------------------------
@@ -392,7 +404,8 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 				lstPatternPoints,  // Input points
 				dat.reconstructed_camera_pose,
 				out_camera_params.intrinsicParams,  // calib matrix
-				projectedPoints  // Output points in pixels
+				projectedPoints,  // Output points in pixels
+				useFisheye
 			);
 
 			vision::pinhole::projectPoints_with_distortion(
@@ -400,7 +413,8 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 				dat.reconstructed_camera_pose,
 				out_camera_params.intrinsicParams,  // calib matrix
 				out_camera_params.getDistortionParamsAsVector(),
-				projectedPoints_distorted  // Output points in pixels
+				projectedPoints_distorted,  // Output points in pixels
+				useFisheye
 			);
 
 			ASSERT_(projectedPoints.size() == CORNERS_COUNT);

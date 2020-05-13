@@ -169,6 +169,7 @@ class CFormEdit : public wxDialog
 	wxFlexGridSizer* FlexGridSizer11;
 	wxButton* btnKeep;
 	wxStaticBoxSizer* StaticBoxSizer5;
+	
 	wxTextCtrl* txtInputFile;
 	wxCheckListBox* cbObsClass;
 	wxTextCtrl* txtOutputFile;

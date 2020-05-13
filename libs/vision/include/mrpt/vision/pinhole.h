@@ -48,7 +48,7 @@ void projectPoints_no_distortion(
 	const mrpt::poses::CPose3D& cameraPose,
 	const mrpt::math::CMatrixDouble33& intrinsicParams,
 	std::vector<mrpt::img::TPixelCoordf>& projectedPoints,
-	bool accept_points_behind = false);
+	bool accept_points_behind = false,bool useFisheye=false);
 
 /** Project a single 3D point with global coordinates P into a camera at pose F,
  *without distortion parameters.
@@ -120,7 +120,7 @@ void projectPoints_with_distortion(
 	const mrpt::math::CMatrixDouble33& intrinsicParams,
 	const std::vector<double>& distortionParams,
 	std::vector<mrpt::img::TPixelCoordf>& projectedPoints,
-	bool accept_points_behind = false);
+	bool accept_points_behind = false,bool useFisheye=false);
 
 /** Project one 3D point into a camera using its calibration matrix and
  * distortion parameters (radial and tangential distortions projection model)
@@ -151,7 +151,7 @@ void projectPoints_with_distortion(
 	const mrpt::img::TCamera& params,
 	const mrpt::poses::CPose3DQuat& cameraPose,
 	std::vector<mrpt::img::TPixelCoordf>& pixels,
-	bool accept_points_behind = false);
+	bool accept_points_behind = false,bool useFisheye=false);
 
 /** Undistort a list of points given by their pixel coordinates, provided the
  * camera matrix and distortion coefficients.

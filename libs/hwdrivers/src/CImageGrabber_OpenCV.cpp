@@ -7,11 +7,12 @@
    | Released under BSD License. See: https://www.mrpt.org/License          |
    +------------------------------------------------------------------------+ */
 
-#include "hwdrivers-precomp.h"  // Precompiled headers
-
 #include <mrpt/3rdparty/do_opencv_includes.h>
 #include <mrpt/hwdrivers/CImageGrabber_OpenCV.h>
+
 #include <thread>
+
+#include "hwdrivers-precomp.h"	// Precompiled headers
 
 #ifdef HAVE_OPENCV_VIDEOIO
 // cv::VideoCapture moved from highgui in opencv2 to videoio in opencv3:
@@ -33,12 +34,13 @@ struct CImageGrabber_OpenCV::Impl
 				Constructor
 -------------------------------------------------------------*/
 CImageGrabber_OpenCV::CImageGrabber_OpenCV(
-	int cameraIndex, TCameraType cameraType, const TCaptureCVOptions& options)
+	int cameraIndex, TCameraType cameraType, const TCaptureCVOptions& options,
+	string color)
 	: m_capture(mrpt::make_impl<CImageGrabber_OpenCV::Impl>())
 {
 	MRPT_START
 	m_bInitialized = false;
-
+	color_ = color;
 #if MRPT_HAS_OPENCV
 	int cv_cap_indx = 0;
 	switch (cameraType)
@@ -87,6 +89,7 @@ CImageGrabber_OpenCV::CImageGrabber_OpenCV(
 					"capturing gain property!"
 				 << endl;
 	}
+	// m_capture->cap.set(CV_CAP_PROP_FOURCC,CV_FOURCC('U','Y','V','Y'));
 
 	// Settings only for firewire
 	if (cameraType == CAMERA_CV_DC1394)
@@ -98,9 +101,9 @@ CImageGrabber_OpenCV::CImageGrabber_OpenCV(
 			enum
 			{
 				MY_MODE_160x120_YUV444 = 64,
-				MY_MODE_320x240_YUV422,  // ***
+				MY_MODE_320x240_YUV422,	 // ***
 				MY_MODE_640x480_YUV411,
-				MY_MODE_640x480_YUV422,  // ***
+				MY_MODE_640x480_YUV422,	 // ***
 				MY_MODE_640x480_RGB,  // ?
 				MY_MODE_640x480_MONO,  // ***
 				MY_MODE_640x480_MONO16
@@ -231,6 +234,11 @@ bool CImageGrabber_OpenCV::getObservation(
 			out_observation.timestamp = mrpt::system::now();
 			out_observation.image =
 				mrpt::img::CImage(capImg, mrpt::img::SHALLOW_COPY);
+			if (color_ == "uyvy")
+			{
+				out_observation.image.isuyvy = true;
+			}
+
 			return true;
 		}
 		cerr << "[CImageGrabber_OpenCV] WARNING: Ignoring error #" << nTries + 1

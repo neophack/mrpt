@@ -46,6 +46,7 @@ class CDlgCalibWizardOnline : public wxDialog
 	wxTextCtrl* edLengthY;
 	wxButton* btnClose;
 	wxCheckBox* cbNormalize;
+	wxCheckBox* cbTurn180;
 	wxRadioBox* rbMethod;
 	mrpt::gui::wxMRPTImageControl* m_realtimeview;
 	wxSpinCtrl* edSizeY;
@@ -79,6 +80,7 @@ class CDlgCalibWizardOnline : public wxDialog
 	static const long ID_STATICTEXT4;
 	static const long ID_TEXTCTRL3;
 	static const long ID_CHECKBOX1;
+	static const long ID_CHECKBOX2;
 	static const long ID_STATICTEXT5;
 	static const long ID_SPINCTRL3;
 	static const long ID_STATICTEXT6;

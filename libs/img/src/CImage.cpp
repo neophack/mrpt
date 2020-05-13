@@ -7,8 +7,6 @@
    | Released under BSD License. See: https://www.mrpt.org/License          |
    +------------------------------------------------------------------------+ */
 
-#include "img-precomp.h"  // Precompiled headers
-
 #include <mrpt/core/cpu.h>
 #include <mrpt/core/round.h>  // for round()
 #include <mrpt/img/CImage.h>
@@ -23,7 +21,10 @@
 #include <mrpt/system/CTimeLogger.h>
 #include <mrpt/system/filesystem.h>
 #include <mrpt/system/memory.h>
+
 #include <iostream>
+
+#include "img-precomp.h"  // Precompiled headers
 
 // Universal include for all versions of OpenCV
 #include <mrpt/3rdparty/do_opencv_includes.h>
@@ -36,6 +37,20 @@
 
 // Prototypes of SSE2/SSE3/SSSE3 optimized functions:
 #include "CImage.SSEx.h"
+
+#define YUV2RGB(y, u, v, r, g, b)                                              \
+	r = y +                                                                    \
+		(((v << 10) + (v << 8) + (v << 7) + (v << 4) + (v << 3) + (v << 1)) >> \
+		 11);                                                                  \
+	g = y - (((u << 8) + (u << 7) + (u << 4) + (u << 2) + (u << 1)) >> 11) -   \
+		(((v << 9) + (v << 6) + (v << 4) + (v << 1) + v) >> 11);               \
+	b = y + (((u << 11) + (u << 5) - (u << 1)) >> 11);                         \
+	r = r < 0 ? 0 : r;                                                         \
+	g = g < 0 ? 0 : g;                                                         \
+	b = b < 0 ? 0 : b;                                                         \
+	r = r > 255 ? 255 : r;                                                     \
+	g = g > 255 ? 255 : g;                                                     \
+	b = b > 255 ? 255 : b
 
 using namespace mrpt;
 using namespace mrpt::img;
@@ -153,7 +168,7 @@ static PixelDepth cvDepth2PixelDepth(int64_t d)
 	return PixelDepth::D8U;
 }
 
-#endif  // MRPT_HAS_OPENCV
+#endif	// MRPT_HAS_OPENCV
 
 // Default ctor
 CImage::CImage() : m_impl(mrpt::make_impl<CImage::Impl>()) {}
@@ -518,7 +533,7 @@ void CImage::serializeTo(mrpt::serialization::CArchive& out) const
 		// GRAY-SCALE: Raw bytes:
 		// Version 3: ZIP compression!
 		// Version 4: Skip zip if the image size <= 16Kb
-		int32_t origin = 0;  // not used mrpt v1.9.9
+		int32_t origin = 0;	 // not used mrpt v1.9.9
 		uint32_t imageSize = height * m_impl->img.step[0];
 		// Version 10: depth
 		int32_t depth = m_impl->img.depth();
@@ -979,7 +994,53 @@ bool CImage::grayscale(CImage& ret) const
 		// Detect in-place op and make deep copy:
 		if (src.data == ret.m_impl->img.data) src = src.clone();
 
-		return my_img_to_grayscale(src, ret.m_impl->img);
+		if (isuyvy)
+		{
+			
+			cv::Size srcsize = src.size();
+			unsigned char* YUV = src.data;
+
+			int width = srcsize.width;
+			int height = srcsize.height;
+			int NumPixels = width * height;
+			// cv::Mat yuyv_frame = cv::Mat(height, width, CV_8UC2,(unsigned char*)src.data);
+			// yuyv_frame.data=src.data;
+			// unsigned char* RGB = new unsigned char[width * height * 3];
+			
+			// // std::cout<<src.total()<<std::endl;
+			// {
+			// 	/*routine to convert an array of YUV data to RGB format
+			// 	from Bart Nabbe
+			// 	*/
+
+			// 	int i, j;
+			// 	register int y0, y1, u, v;
+			// 	register int r, g, b;
+
+			// 	for (i = 0, j = 0; i < (NumPixels << 1); i += 4, j += 6)
+			// 	{
+			// 		u = (unsigned char)YUV[i + 0] - 128;
+			// 		y0 = (unsigned char)YUV[i + 1];
+			// 		v = (unsigned char)YUV[i + 2] - 128;
+			// 		y1 = (unsigned char)YUV[i + 3];
+			// 		YUV2RGB(y0, u, v, r, g, b);
+			// 		RGB[j + 0] = r;
+			// 		RGB[j + 1] = g;
+			// 		RGB[j + 2] = b;
+			// 		YUV2RGB(y1, u, v, r, g, b);
+			// 		RGB[j + 3] = r;
+			// 		RGB[j + 4] = g;
+			// 		RGB[j + 5] = b;
+			// 	}
+			// }
+			cv::Mat des ;//= cv::Mat(height, width, CV_8UC2);
+			cv::cvtColor(src,des,cv::COLOR_BGR2YUV);
+			return my_img_to_grayscale(des, ret.m_impl->img);
+		}
+		else
+		{
+			return my_img_to_grayscale(src, ret.m_impl->img);
+		}
 	}
 #else
 	THROW_EXCEPTION("Operation not supported: build MRPT against OpenCV!");
@@ -1200,7 +1261,7 @@ float CImage::correlate(
 				i + height_init);  //(double)(ipl1->imageData[i*ipl1->widthStep
 			//+ j ]);
 			m2 += *img2(
-				j, i);  //(double)(ipl2->imageData[i*ipl2->widthStep + j ]);
+				j, i);	//(double)(ipl2->imageData[i*ipl2->widthStep + j ]);
 		}  //[ row * ipl->widthStep +  col * ipl->nChannels +  channel ];
 	}
 	m1 /= n;
@@ -1213,7 +1274,7 @@ float CImage::correlate(
 			x1 = *(*this)(j + width_init, i + height_init) -
 				 m1;  //(double)(ipl1->imageData[i*ipl1->widthStep
 					  //+ j]) - m1;
-			x2 = *img2(j, i) - m2;  //(double)(ipl2->imageData[i*ipl2->widthStep
+			x2 = *img2(j, i) - m2;	//(double)(ipl2->imageData[i*ipl2->widthStep
 									//+ j]) - m2;
 			sxx += x1 * x1;
 			syy += x2 * x2;
@@ -1709,6 +1770,64 @@ void CImage::undistort(
 #endif
 }
 
+void CImage::undistortFisheye(
+	CImage& out_img, const mrpt::img::TCamera& cameraParams) const
+{
+#if MRPT_HAS_OPENCV
+	makeSureImageIsLoaded();  // For delayed loaded images stored externally
+
+	ASSERTMSG_(
+		out_img.m_impl->img.data != m_impl->img.data,
+		"In-place undistort() not supported");
+
+	auto& srcImg = const_cast<cv::Mat&>(m_impl->img);
+	// This will avoid re-alloc if size already matches.
+	out_img.resize(srcImg.cols, srcImg.rows, getChannelCount());
+
+	const auto& intrMat = cameraParams.intrinsicParams;
+	const auto& dist = cameraParams.dist;
+
+	cv::Mat distM(1, 4, CV_64F, const_cast<double*>(&dist[0]));
+	cv::Mat inMat(3, 3, CV_64F);
+
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++) inMat.at<double>(i, j) = intrMat(i, j);
+	cv::Matx33d newK = inMat;
+	cv::fisheye::undistortImage(
+		srcImg, out_img.m_impl->img, inMat, distM, newK);
+	// cv::undistort(srcImg, out_img.m_impl->img, inMat, distM);
+#endif
+}
+
+CImage CImage::turn180()
+{
+#if MRPT_HAS_OPENCV
+	CImage ret(*this);
+	ret.m_impl->img = m_impl->img.clone();
+	auto& srcImg = const_cast<cv::Mat&>(ret.m_impl->img);
+	cv::flip(srcImg, srcImg, 0);
+	cv::flip(srcImg, ret.m_impl->img, 1);
+	return ret;
+
+#endif
+}
+
+CImage CImage::uyuv2yuyv()
+{
+#if MRPT_HAS_OPENCV
+	CImage ret(*this);
+	ret.m_impl->img = m_impl->img.clone();
+	auto& srcImg = const_cast<cv::Mat&>(ret.m_impl->img);
+	cv::Size srcsize = srcImg.size();
+	std::cout << srcImg.channels() << " " << srcImg.size() << std::endl;
+	// cv::Mat des;
+	// uyvy_to_yuv420P(srcImg.data,des.data,srcsize.width,srcsize.height);
+
+	return ret;
+
+#endif
+}
+
 void CImage::filterMedian(CImage& out_img, int W) const
 {
 #if MRPT_HAS_OPENCV
@@ -1782,7 +1901,7 @@ void CImage::rotateImage(
 
 	// Apply rotation & scale:
 	double m[2 * 3] = {scale * cos(ang), -scale * sin(ang), 1.0 * cx,
-					   scale * sin(ang), scale * cos(ang),  1.0 * cy};
+					   scale * sin(ang), scale * cos(ang),	1.0 * cy};
 	cv::Mat M(2, 3, CV_64F, m);
 
 	double dx = (srcImg.cols - 1) * 0.5;
@@ -2081,8 +2200,8 @@ float MRPT_DISABLE_FULL_OPTIMIZATION CImage::KLT_response(
 	//    ( gxy  gyy )
 	// See, for example:
 	// mrpt::math::detail::eigenVectorsMatrix_special_2x2():
-	const float t = Gxx + Gyy;  // Trace
-	const float de = Gxx * Gyy - Gxy * Gxy;  // Det
+	const float t = Gxx + Gyy;	// Trace
+	const float de = Gxx * Gyy - Gxy * Gxy;	 // Det
 	// The smallest eigenvalue is:
 	return 0.5f * (t - std::sqrt(t * t - 4.0f * de));
 #else
@@ -2164,9 +2283,9 @@ bool CImage::loadTGA(
 
 		for (unsigned int c = 0; c < width; c++)
 		{
-			*data++ = bytes[idx++];  // R
-			*data++ = bytes[idx++];  // G
-			*data++ = bytes[idx++];  // B
+			*data++ = bytes[idx++];	 // R
+			*data++ = bytes[idx++];	 // G
+			*data++ = bytes[idx++];	 // B
 			*data_alpha++ = bytes[idx++];  // A
 		}
 	}
@@ -2174,7 +2293,7 @@ bool CImage::loadTGA(
 	return true;
 #else
 	return false;
-#endif  // MRPT_HAS_OPENCV
+#endif	// MRPT_HAS_OPENCV
 }
 
 void CImage::getAsIplImage(IplImage* dest) const

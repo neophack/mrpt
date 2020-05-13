@@ -92,7 +92,8 @@ bool checkerBoardCameraCalibration(
 	double check_squares_length_Y_meters, mrpt::img::TCamera& out_camera_params,
 	bool normalize_image = true, double* out_MSE = nullptr,
 	bool skipDrawDetectedImgs = false,
-	bool useScaramuzzaAlternativeDetector = false,bool useFisheye=false);
+	bool useScaramuzzaAlternativeDetector = false,
+	bool useFisheye=false);
 
 /** \overload with matrix of intrinsic params instead of mrpt::img::TCamera
  */
@@ -103,7 +104,8 @@ bool checkerBoardCameraCalibration(
 	mrpt::math::CMatrixDouble33& intrinsicParams,
 	std::vector<double>& distortionParams, bool normalize_image = true,
 	double* out_MSE = nullptr, bool skipDrawDetectedImgs = false,
-	bool useScaramuzzaAlternativeDetector = false,bool useFisheye=false);
+	bool useScaramuzzaAlternativeDetector = false,
+	bool useFisheye=false);
 
 /** @}  */  // end of grouping
 }  // namespace mrpt::vision

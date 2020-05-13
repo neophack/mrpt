@@ -153,6 +153,7 @@ class CImage : public mrpt::serialization::CSerializable, public CCanvas
 	DECLARE_MEX_CONVERSION
 
    public:
+   bool isuyvy=false;
 	/** @name Constructors & destructor
 		@{ */
 
@@ -414,7 +415,15 @@ class CImage : public mrpt::serialization::CSerializable, public CCanvas
 	 */
 	void undistort(
 		CImage& out_img, const mrpt::img::TCamera& cameraParams) const;
+	void undistortFisheye(
+		CImage& out_img, const mrpt::img::TCamera& cameraParams) const;
 
+
+	CImage turn180();
+
+	CImage uyuv2yuyv();
+	
+	
 	/** Rectify an image (undistorts and rectification) from a stereo pair
 	 * according to a pair of precomputed rectification maps
 	 * \param mapX, mapY   [IN] The pre-computed maps of the rectification

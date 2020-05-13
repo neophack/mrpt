@@ -121,7 +121,7 @@ CDlgPoseEst::CDlgPoseEst(
 		StaticText1, 1,
 		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
 	edSizeX = new wxSpinCtrl(
-		this, ID_SPINCTRL1, _T("5"), wxDefaultPosition, wxSize(50, -1), 0, 1,
+		this, ID_SPINCTRL1, _T("5"), wxDefaultPosition, wxSize(-1, -1), 0, 1,
 		200, 5, _T("ID_SPINCTRL1"));
 	edSizeX->SetValue(_T("9"));
 	FlexGridSizer17->Add(
@@ -134,7 +134,7 @@ CDlgPoseEst::CDlgPoseEst(
 		StaticText2, 1,
 		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
 	edSizeY = new wxSpinCtrl(
-		this, ID_SPINCTRL2, _T("8"), wxDefaultPosition, wxSize(50, -1), 0, 1,
+		this, ID_SPINCTRL2, _T("8"), wxDefaultPosition, wxSize(-1, -1), 0, 1,
 		200, 8, _T("ID_SPINCTRL2"));
 	edSizeY->SetValue(_T("7"));
 	FlexGridSizer17->Add(

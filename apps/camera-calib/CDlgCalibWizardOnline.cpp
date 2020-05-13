@@ -37,6 +37,7 @@ const long CDlgCalibWizardOnline::ID_TEXTCTRL1 = wxNewId();
 const long CDlgCalibWizardOnline::ID_STATICTEXT4 = wxNewId();
 const long CDlgCalibWizardOnline::ID_TEXTCTRL3 = wxNewId();
 const long CDlgCalibWizardOnline::ID_CHECKBOX1 = wxNewId();
+const long CDlgCalibWizardOnline::ID_CHECKBOX2 = wxNewId();
 const long CDlgCalibWizardOnline::ID_STATICTEXT5 = wxNewId();
 const long CDlgCalibWizardOnline::ID_SPINCTRL3 = wxNewId();
 const long CDlgCalibWizardOnline::ID_STATICTEXT6 = wxNewId();
@@ -65,6 +66,7 @@ CDlgCalibWizardOnline::CDlgCalibWizardOnline(
 	wxStaticBoxSizer* StaticBoxSizer2;
 	wxFlexGridSizer* FlexGridSizer2;
 	wxStaticBoxSizer* StaticBoxSizer5;
+	wxStaticBoxSizer* StaticBoxSizer8;
 	wxFlexGridSizer* FlexGridSizer17;
 	wxFlexGridSizer* FlexGridSizer7;
 	wxFlexGridSizer* FlexGridSizer4;
@@ -111,7 +113,7 @@ CDlgCalibWizardOnline::CDlgCalibWizardOnline(
 		StaticText1, 1,
 		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
 	edSizeX = new wxSpinCtrl(
-		this, ID_SPINCTRL1, _T("5"), wxDefaultPosition, wxSize(50, -1), 0, 1,
+		this, ID_SPINCTRL1, _T("5"), wxDefaultPosition, wxSize(100, -1), 0, 1,
 		200, 5, _T("ID_SPINCTRL1"));
 	edSizeX->SetValue(_T("5"));
 	FlexGridSizer17->Add(
@@ -124,7 +126,7 @@ CDlgCalibWizardOnline::CDlgCalibWizardOnline(
 		StaticText2, 1,
 		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
 	edSizeY = new wxSpinCtrl(
-		this, ID_SPINCTRL2, _T("8"), wxDefaultPosition, wxSize(50, -1), 0, 1,
+		this, ID_SPINCTRL2, _T("8"), wxDefaultPosition, wxSize(100, -1), 0, 1,
 		200, 8, _T("ID_SPINCTRL2"));
 	edSizeY->SetValue(_T("8"));
 	FlexGridSizer17->Add(
@@ -134,8 +136,8 @@ CDlgCalibWizardOnline::CDlgCalibWizardOnline(
 		FlexGridSizer17, 1, wxALL | wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 0);
 	FlexGridSizer6->Add(
 		StaticBoxSizer4, 1, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 2);
-	wxString __wxRadioBoxChoices_1[2] = {_("OpenCV\'s default"),
-										 _("Scaramuzza et al.\'s")};
+	wxString __wxRadioBoxChoices_1[2] = {_("OpenCV"),
+										 _("Scaramuzza")};
 	rbMethod = new wxRadioBox(
 		this, ID_RADIOBOX1, _(" Detector method: "), wxDefaultPosition,
 		wxDefaultSize, 2, __wxRadioBoxChoices_1, 1, 0, wxDefaultValidator,
@@ -173,13 +175,25 @@ CDlgCalibWizardOnline::CDlgCalibWizardOnline(
 		FlexGridSizer18, 1, wxALL | wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 0);
 	FlexGridSizer6->Add(
 		StaticBoxSizer5, 1, wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 2);
+	StaticBoxSizer8 = new wxStaticBoxSizer(
+		wxHORIZONTAL, this, _("Other: "));	
 	cbNormalize = new wxCheckBox(
 		this, ID_CHECKBOX1, _("Normalize image"), wxDefaultPosition,
 		wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX1"));
 	cbNormalize->SetValue(true);
-	FlexGridSizer6->Add(
+	cbTurn180 = new wxCheckBox(
+		this, ID_CHECKBOX2, _("Turn 180"), wxDefaultPosition,
+		wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX2"));
+	cbTurn180->SetValue(true);
+	StaticBoxSizer8->Add(
 		cbNormalize, 1,
-		wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+        wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 2);
+	StaticBoxSizer8->Add(
+		cbTurn180, 1,
+		wxALL | wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL, 2);
+	FlexGridSizer6->Add(
+		StaticBoxSizer8, 1, wxALL | wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 2
+	);
 	StaticBoxSizer3->Add(
 		FlexGridSizer6, 1, wxALL | wxEXPAND | wxALIGN_LEFT | wxALIGN_TOP, 0);
 	FlexGridSizer2->Add(
@@ -195,7 +209,7 @@ CDlgCalibWizardOnline::CDlgCalibWizardOnline(
 	FlexGridSizer7->Add(
 		StaticText5, 1, wxALL | wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL, 5);
 	edNumCapture = new wxSpinCtrl(
-		this, ID_SPINCTRL3, _T("15"), wxDefaultPosition, wxDefaultSize, 0, 5,
+		this, ID_SPINCTRL3, _T("15"), wxDefaultPosition, wxSize(100, -1), 0, 5,
 		100, 15, _T("ID_SPINCTRL3"));
 	edNumCapture->SetValue(_T("15"));
 	FlexGridSizer7->Add(
@@ -346,7 +360,7 @@ void CDlgCalibWizardOnline::OnbtnStopClick(wxCommandEvent& event)
 void CDlgCalibWizardOnline::OntimCaptureTrigger(wxTimerEvent& event)
 {
 	static mrpt::system::TTimeStamp last_valid = INVALID_TIMESTAMP;
-
+	const bool turn180 = cbTurn180->GetValue();
 	try
 	{
 		if (!btnStop->IsEnabled())
@@ -390,7 +404,6 @@ void CDlgCalibWizardOnline::OntimCaptureTrigger(wxTimerEvent& event)
 		// get the observation:
 		CObservationImage::Ptr obs_img =
 			std::dynamic_pointer_cast<CObservationImage>(obs);
-
 		// Is there a detection??
 		bool blankTime =
 			(last_valid != INVALID_TIMESTAMP) &&
@@ -401,10 +414,18 @@ void CDlgCalibWizardOnline::OntimCaptureTrigger(wxTimerEvent& event)
 			// Save image to the list:
 			string newImgName =
 				format("frame_%03u", (unsigned int)m_calibFrames.size());
-			m_calibFrames[newImgName].img_original =
-				m_calibFrames[newImgName].img_checkboard =
-					m_calibFrames[newImgName].img_rectified =
-						m_threadImgToProcess->image;
+			if(turn180){
+				m_calibFrames[newImgName].img_original =
+					m_calibFrames[newImgName].img_checkboard =
+						m_calibFrames[newImgName].img_rectified =
+							m_threadImgToProcess->image.turn180();
+			}else{
+				m_calibFrames[newImgName].img_original =
+					m_calibFrames[newImgName].img_checkboard =
+						m_calibFrames[newImgName].img_rectified =
+							m_threadImgToProcess->image;
+			}
+			
 
 			// Counter:
 			lbProgress->SetLabel(
@@ -422,7 +443,11 @@ void CDlgCalibWizardOnline::OntimCaptureTrigger(wxTimerEvent& event)
 		else
 		{
 			// Show current image:
-			img_to_show = obs_img->image;
+			if(turn180){
+				img_to_show = obs_img->image.turn180();
+			}else{
+				img_to_show = obs_img->image;
+			}
 		}
 
 		// Process a new image to detect checkerboard:
@@ -435,11 +460,12 @@ void CDlgCalibWizardOnline::OntimCaptureTrigger(wxTimerEvent& event)
 
 		// Progress:
 		const auto nFramesToGrab = (unsigned)edNumCapture->GetValue();
+		TImageSize imsize=img_to_show.getSize();
 		img_to_show.textOut(
 			10, 10,
 			format(
-				"%u out of %u grabbed", (unsigned int)m_calibFrames.size(),
-				nFramesToGrab),
+				"%u/%u grabbed, size %ux%u", (unsigned int)m_calibFrames.size(),
+				nFramesToGrab,imsize.x,imsize.y),
 			TColor::white());
 
 		m_realtimeview->AssignImage(img_to_show);

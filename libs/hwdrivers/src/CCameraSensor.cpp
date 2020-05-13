@@ -49,6 +49,7 @@ CCameraSensor::CCameraSensor()
 	  m_grabber_type("opencv"),
 
 	  m_cv_camera_type("CAMERA_CV_AUTODETECT"),
+	  m_cv_camera_color("default"),
 	  m_cv_options(),
 
 	  m_dc1394_options(),
@@ -100,7 +101,7 @@ void CCameraSensor::initialize()
 			"%i...\n",
 			int(m_cv_camera_index), (int)ct);
 		m_cap_cv = std::make_unique<CImageGrabber_OpenCV>(
-			m_cv_camera_index, ct, m_cv_options);
+			m_cv_camera_index, ct, m_cv_options,m_cv_camera_color);
 
 		if (!m_cap_cv->isOpen())
 		{
@@ -445,6 +446,8 @@ void CCameraSensor::loadConfig_sensorSpecific(
 	// OpenCV options:
 	m_cv_camera_type = configSource.read_string_first_word(
 		iniSection, "cv_camera_type", m_cv_camera_type);
+	m_cv_camera_color = configSource.read_string_first_word(
+		iniSection, "cv_camera_color", m_cv_camera_color);
 	m_cv_camera_index =
 		configSource.read_int(iniSection, "cv_camera_index", m_cv_camera_index);
 
