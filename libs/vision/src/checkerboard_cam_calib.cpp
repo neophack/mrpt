@@ -23,7 +23,7 @@ using namespace mrpt::img;
 using namespace mrpt::config;
 using namespace mrpt::math;
 using namespace mrpt::poses;
-using namespace std;
+//using namespace std;
 
 /* -------------------------------------------------------
 				checkerBoardCameraCalibration
@@ -82,7 +82,7 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 
 		// Fill the pattern of expected pattern points only once out of the
 		// loop:
-		vector<cv::Point3f> pattern_obj_points(CORNERS_COUNT);
+		std::vector<cv::Point3f> pattern_obj_points(CORNERS_COUNT);
 		{
 			unsigned int y, k;
 			for (y = 0, k = 0; y < check_size_y; y++)
@@ -124,13 +124,13 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 
 		// For each image, find checkerboard corners:
 		// -----------------------------------------------
-		vector<vector<cv::Point3f>>
+		std::vector<std::vector<cv::Point3f>>
 			objectPoints;  // final container for detected stuff
-		vector<vector<cv::Point2f>>
+		std::vector<std::vector<cv::Point2f>>
 			imagePoints;  // final container for detected stuff
 
 		unsigned int valid_detected_imgs = 0;
-		vector<string> pointsIdx2imageFile;
+		std::vector<std::string> pointsIdx2imageFile;
 		cv::Size imgSize(0, 0);
 
 		unsigned int i;
@@ -166,7 +166,7 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 
 			corners_count = CORNERS_COUNT;
 
-			vector<cv::Point2f> this_img_pts(
+			std::vector<cv::Point2f> this_img_pts(
 				CORNERS_COUNT);  // Temporary buffer for points, to be added if
 			// the points pass the checks.
 
@@ -174,7 +174,7 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 
 			// Do detection (this includes the "refine corners" with
 			// cvFindCornerSubPix):
-			vector<TPixelCoordf> detectedCoords;
+			std::vector<TPixelCoordf> detectedCoords;
 			corners_found = mrpt::vision::findChessboardCorners(
 				img_gray, detectedCoords, check_size_x, check_size_y,
 				normalize_image,  // normalize_image
@@ -193,7 +193,7 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 			if (corners_found && corners_count != CORNERS_COUNT)
 				corners_found = false;
 
-			cout << format(
+			std::cout << format(
 				"Img %s: %s\n",
 				mrpt::system::extractFileName(it->first).c_str(),
 				corners_found ? "DETECTED" : "NOT DETECTED");
@@ -277,13 +277,19 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 		// Calculate the camera parameters
 		// ---------------------------------------------
 		// Calibrate camera
-		cv::Mat cameraMatrix, distCoeffs(1, 5, CV_64F, cv::Scalar::all(0));
-		vector<cv::Mat> rvecs, tvecs;
+		cv::Mat cameraMatrix, distCoeffs;
+		// if (useFisheye) {
+			
+		// } else {
+			distCoeffs = cv::Mat::zeros(1, 5, CV_64F);
+		// }
+
+		std::vector<cv::Mat> rvecs, tvecs;
 		double cv_calib_err;
 		if (useFisheye) {
 			cv::Mat _rvecs, _tvecs;
 			cv::Mat _distCoeffs = cv::Mat::zeros(1, 4, CV_64F);
-                        //std::cout<<"useFisheye"<<std::endl;
+            std::cout<<"useFisheye"<<std::endl;
 			int  flag = cv::fisheye::CALIB_FIX_SKEW | cv::fisheye::CALIB_RECOMPUTE_EXTRINSIC;
 			cv_calib_err = cv::fisheye::calibrate(objectPoints, imagePoints, imgSize, cameraMatrix, _distCoeffs, _rvecs,
 									_tvecs, flag);
@@ -294,13 +300,15 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 				rvecs.push_back(_rvecs.row(ii));
 				tvecs.push_back(_tvecs.row(ii));
 			}
-                        //std::cout<<cameraMatrix<<_distCoeffs<<std::endl;
+            std::cout<<cameraMatrix<<_distCoeffs<<std::endl;
+			// for (int k = 0; k < 4; k++)
 			cv::vconcat(_distCoeffs,cv::Mat::zeros(1, 1, CV_64F),distCoeffs);
 		} else {
 		 cv_calib_err = cv::calibrateCamera(
 			objectPoints, imagePoints, imgSize, cameraMatrix, distCoeffs, rvecs,
 			tvecs, 0 /*flags*/);
 		}
+        std::cout<<rvecs[0]<<std::endl;
 		// Load matrix:
 		{
 			Eigen::Matrix3d M;
@@ -312,7 +320,7 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 		for (int k = 0; k < 5; k++)
 			out_camera_params.dist[k] = distCoeffs.ptr<double>()[k];
 
-                if(!useFisheye)
+        if(!useFisheye)
 		// Load camera poses:
 		for (i = 0; i < valid_detected_imgs; i++)
 		{
@@ -380,16 +388,16 @@ bool mrpt::vision::checkerBoardCameraCalibration(
 
 			// Reproject all the points into pixel coordinates:
 			// -----------------------------------------------------
-			vector<TPoint3D> lstPatternPoints(
+			std::vector<TPoint3D> lstPatternPoints(
 				CORNERS_COUNT);  // Points as seen from the camera:
 			for (unsigned int p = 0; p < CORNERS_COUNT; p++)
 				lstPatternPoints[p] = TPoint3D(
 					pattern_obj_points[p].x, pattern_obj_points[p].y,
 					pattern_obj_points[p].z);
 
-			vector<TPixelCoordf>& projectedPoints =
+			std::vector<TPixelCoordf>& projectedPoints =
 				dat.projectedPoints_undistorted;
-			vector<TPixelCoordf>& projectedPoints_distorted =
+			std::vector<TPixelCoordf>& projectedPoints_distorted =
 				dat.projectedPoints_distorted;
 
 			vision::pinhole::projectPoints_no_distortion(
