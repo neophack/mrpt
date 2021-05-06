@@ -5,7 +5,7 @@ os: Visual Studio 2019
 
 clone_folder: c:\projects\mrpt
 
-platform: x64
+platform: x86
 configuration: Release
 
 environment:
@@ -40,18 +40,18 @@ install:
   - tree c:\tools\opencv\build /F
   - set OPENCVDIR=C:\tools\opencv\build\
   # This variable is parsed by MRPT/cmakemodules/script_opencv.cmake:
-  - set OPENCV_DLLS_TO_INSTALL_DIRS=%OPENCVDIR%bin;%OPENCVDIR%x64\vc15\bin
-  - set PATH=%PATH%;%OPENCVDIR%\bin;%OPENCVDIR%\x64\vc15\bin
+  - set OPENCV_DLLS_TO_INSTALL_DIRS=%OPENCVDIR%bin;%OPENCVDIR%x86\vc15\bin
+  - set PATH=%PATH%;%OPENCVDIR%\bin;%OPENCVDIR%\x86\vc15\bin
   # ====== Install wxWidgets
   - cd c:\
-  - ps: Start-FileDownload 'https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.3/wxMSW-3.1.3_vc14x_x64_Dev.7z'
+  - ps: Start-FileDownload 'https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.3/wxMSW-3.1.3_vc14x_x86_Dev.7z'
   - ps: Start-FileDownload 'https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.3/wxWidgets-3.1.3-headers.7z'
-  - ps: Start-FileDownload 'https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.3/wxMSW-3.1.3_vc14x_x64_ReleaseDLL.7z'
-  - 7z x wxMSW-3.1.3_vc14x_x64_Dev.7z -oc:\wxWidgets -aoa
+  - ps: Start-FileDownload 'https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.3/wxMSW-3.1.3_vc14x_x86_ReleaseDLL.7z'
+  - 7z x wxMSW-3.1.3_vc14x_x86_Dev.7z -oc:\wxWidgets -aoa
   - 7z x wxWidgets-3.1.3-headers.7z -oc:\wxWidgets -aoa
-  - 7z x wxMSW-3.1.3_vc14x_x64_ReleaseDLL.7z -oc:\wxWidgets -aoa
+  - 7z x wxMSW-3.1.3_vc14x_x86_ReleaseDLL.7z -oc:\wxWidgets -aoa
   - set WXWIDGETSDIR=C:\wxWidgets
-  - set WXWIDGETSLIBDIR=%WXWIDGETSDIR%\lib\vc14x_x64_dll\
+  - set WXWIDGETSLIBDIR=%WXWIDGETSDIR%\lib\vc14x_x86_dll\
   - set PATH=%PATH%;%WXWIDGETSLIBDIR%
   # ====== Qt
   - set QTDIR=C:\Qt\5.14.1\msvc2017_64
