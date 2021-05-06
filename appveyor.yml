@@ -36,9 +36,10 @@ build_script:
 install:
   # ====== Install OpenCV
   - choco upgrade chocolatey
-  - choco install opencv -y
+  #- choco install opencv -y
+  - vcpkg install opencv:x86-windows --recurse
   - tree c:\tools\opencv\build /F
-  - set OPENCVDIR=C:\tools\opencv\build\
+  - set OPENCVDIR=C:\tools\vcpkg\installed\x86-windows
   # This variable is parsed by MRPT/cmakemodules/script_opencv.cmake:
   - set OPENCV_DLLS_TO_INSTALL_DIRS=%OPENCVDIR%bin;%OPENCVDIR%x86\vc15\bin
   - set PATH=%PATH%;%OPENCVDIR%\bin;%OPENCVDIR%\x86\vc15\bin
