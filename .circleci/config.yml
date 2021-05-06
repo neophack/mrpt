@@ -28,7 +28,7 @@ jobs:
     docker:
       - image: mrpt/mrpt-build-env:full-bionic
     steps:
-      - checkout
+      - checkout 
       - run: git submodule sync
       - run: git submodule update --init --recursive
       - run:
