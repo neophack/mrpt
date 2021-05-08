@@ -23,6 +23,7 @@ build_script:
 #  - cmake .
   # Do unit tests:
   - cmake --build . --config Release --target test_legacy
+  - cmd: cp C:\tools\vcpkg\installed\x86-windows\* c:\projects\mrpt\build\Release
   # All seem OK. Build all.
 #  - cmake --build . --config Release
   # Build package:
